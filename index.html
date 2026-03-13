@@ -452,6 +452,7 @@
       <div class="counter-num" id="album-count">—</div>
     </div>
     <button class="logout-btn" onclick="logout()">Disconnect</button>
+<button class="logout-btn" onclick="refreshLibrary()">Refresh library</button>
   </div>
 </div>
 
@@ -604,7 +605,7 @@ async function loadAlbums() {
   // Check cache (refreshes every 24h)
   const cached = localStorage.getItem('spotify_albums');
   const cachedTime = localStorage.getItem('spotify_albums_time');
-  if (cached && cachedTime && Date.now() - parseInt(cachedTime) < 86400000) {
+  if (cached) {
     albums = JSON.parse(cached);
     setStatus('Connected');
     document.getElementById('album-count').textContent = albums.length;
@@ -705,7 +706,14 @@ function openInSpotify() {
   if (!currentAlbum) return;
   // Try app URI first, fall back to web URL
   window.location = currentAlbum.uri;
-  setTimeout(() => { window.open(currentAlbum.url, '_blank'); }, 500);
+}
+
+async function refreshLibrary() {
+  localStorage.removeItem('spotify_albums');
+  localStorage.removeItem('spotify_albums_time');
+  albums = [];
+  await loadAlbums();
+  showToast('Library refreshed');
 }
 
 // ─── Utils ────────────────────────────────────────────────────────────────────
